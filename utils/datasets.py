@@ -62,7 +62,7 @@ class ListDataset(Dataset):
             self.img_files = file.readlines()
 
         self.label_files = [
-            path.replace("images", "labels").replace(".png", ".txt").replace(".jpg", ".txt")
+            path.replace("images", "labels").replace(".png", ".txt").replace(".jpg", ".txt").replace(".JPEG", ".txt")
             for path in self.img_files
         ]
         self.img_size = img_size
@@ -125,7 +125,7 @@ class ListDataset(Dataset):
             targets[:, 1:] = boxes
 
         # Apply augmentations
-        if self.augment:
+        if self.augment and targets is not None:
             if np.random.random() < 0.5:
                 img, targets = horisontal_flip(img, targets)
 
