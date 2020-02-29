@@ -48,8 +48,8 @@ if __name__ == "__main__":
 
     # Get data configuration
     data_config = parse_data_config(opt.data_config)
-    train_path = data_config["train_shuffle"]
-    valid_path = data_config["valid_shuffle"]
+    train_path = data_config["train"]
+    valid_path = data_config["valid"]
     class_names = load_classes(data_config["names"])
 
     # Initiate model
@@ -92,7 +92,8 @@ if __name__ == "__main__":
         "conf_obj",
         "conf_noobj",
     ]
-
+    ap_list = []
+    loss_list = []
     for epoch in range(opt.epochs):
         model.train()
         start_time = time.time()
@@ -117,7 +118,8 @@ if __name__ == "__main__":
             log_str = "\n---- [Epoch %d/%d, Batch %d/%d] ----\n" % (epoch, opt.epochs, batch_i, len(dataloader))
 
             metric_table = [["Metrics", *[f"YOLO Layer {i}" for i in range(len(model.yolo_layers))]]]
-
+            if batch_i % len(dataloader) == 0:
+                loss_list.append(loss.item())
             # Log metrics at each YOLO layer
             for i, metric in enumerate(metrics):
                 formats = {m: "%.6f" for m in metrics}
@@ -173,6 +175,8 @@ if __name__ == "__main__":
                 ap_table += [[c, class_names[c], "%.5f" % AP[i]]]
             print(AsciiTable(ap_table).table)
             print(f"---- mAP {AP.mean()}")
-
+            ap_list.append(AP)
         if epoch % opt.checkpoint_interval == 0:
             torch.save(model.state_dict(), f"checkpoints/yolov3_ckpt_%d.pth" % epoch)
+    np.save("ap.npy", ap_list)
+    np.save("loss.npy", loss_list)
