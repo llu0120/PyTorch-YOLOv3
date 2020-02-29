@@ -48,8 +48,8 @@ if __name__ == "__main__":
 
     # Get data configuration
     data_config = parse_data_config(opt.data_config)
-    train_path = data_config["train"]
-    valid_path = data_config["valid"]
+    train_path = data_config["train_shuffle"]
+    valid_path = data_config["valid_shuffle"]
     class_names = load_classes(data_config["names"])
 
     # Initiate model
